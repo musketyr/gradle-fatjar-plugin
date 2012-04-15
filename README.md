@@ -60,7 +60,7 @@ fatJarPrepareFiles {
 ### Exclude JARs
 
 If you need to keep some JARs out of the JAR with dependencies you can specify extendended property `fatJarExclude` on
-particular dependency.
+particular dependency. All excluded JARs will be placed in `WEB-INF\lib` directory if `slimWar` task is called.
 
 ```groovy
 dependencies {
