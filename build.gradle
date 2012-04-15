@@ -1,0 +1,99 @@
+apply plugin: 'groovy'
+
+group = 'eu.appsatori'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    groovy 'org.codehaus.groovy:groovy-all:1.8.6'
+    compile gradleApi()
+    
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
+}
+
+if(hasProperty('sonatypeUsername') && hasProperty('sonatypePassword')){
+    apply plugin: 'signing'
+    apply plugin: 'maven'
+    
+    signing {
+        sign configurations.archives
+    }
+    
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        from "${project.docsDir}/javadoc"
+        classifier = 'javadoc'
+    }
+    
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+    
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                def auth = {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/", auth)
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots", auth)
+
+
+                pom.project {
+                    name 'Gradle FatJar Plugin'
+                    packaging 'jar'
+                    description 'Gradle plugin to build fat JARs with dependencies.'
+                    url 'https://github.com/musketyr/gradle-fatjar-plugin.git'
+
+                    scm {
+                        url 'scm:git://github.com/musketyr/gradle-fatjar-plugin.git'
+                        connection 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git'
+                        developerConnection 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'vladimirorany'
+                            name 'Vladimir Orany'
+                        }
+                    }
+                }
+
+                //mess with the generated pom to set the 'packaging' tag
+                pom.withXml { XmlProvider xmlProvider ->
+                    def xml = xmlProvider.asString()
+                    def pomXml = new XmlParser().parse(new ByteArrayInputStream(xml.toString().bytes))
+
+                    pomXml.version[0] + { packaging('jar') }
+
+                    def newXml = new StringWriter()
+                    def printer = new XmlNodePrinter(new PrintWriter(newXml))
+                    printer.preserveWhitespace = true
+                    printer.print(pomXml)
+                    xml.setLength(0)
+                    xml.append(newXml.toString())
+                }
+            }
+        }
+    }
+}
+
