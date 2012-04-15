@@ -10,7 +10,7 @@ import spock.lang.Specification
 
 class PrepareFilesTaskSpec extends Specification {
 
-    def 'Test precompile task'() {
+    def 'Test prepare task'() {
         given:
             Project project = ProjectBuilder.builder().build()
 
@@ -25,6 +25,7 @@ class PrepareFilesTaskSpec extends Specification {
             File resourcesDirServiceDir =  new File(resourcesDir.absolutePath + '/META-INF/services/')
             resourcesDirServiceDir.mkdirs()
             new File(resourcesDirServiceDir, 'a.b.c.Service').append('a.b.c.ServiceImpl')
+            new File(resourcesDir.absolutePath + '/META-INF/generic.file').append('xyz')
             
             File fakeClasspath = new File(dir, 'classpath')
             fakeClasspath.mkdirs()
@@ -32,6 +33,9 @@ class PrepareFilesTaskSpec extends Specification {
             File fakeClasspathServiceDir = new File(fakeClasspath.absolutePath + '/META-INF/services/')
             fakeClasspathServiceDir.mkdirs()
             new File(fakeClasspathServiceDir, 'a.b.c.Service').append('e.f.g.ServiceImpl')
+            new File(fakeClasspath.absolutePath + '/META-INF/generic.file').append('abc')
+            
+            
             
             File libDir = new File(dir, 'lib')
             libDir.mkdirs()
@@ -48,6 +52,10 @@ class PrepareFilesTaskSpec extends Specification {
             task.compileClasspath = project.files(fakeClasspath) + project.fileTree(libDir)
             task.stageDir = stageDir
             
+            task.configure {
+                include 'META-INF/generic.file'
+            }
+            
         when:
             task.prepareFiles()
 
@@ -60,6 +68,9 @@ class PrepareFilesTaskSpec extends Specification {
             new File(stageDir.absolutePath + '/META-INF/services/a.b.c.Service').exists()
             new File(stageDir.absolutePath + '/META-INF/services/a.b.c.Service').text.contains('a.b.c.ServiceImpl')
             new File(stageDir.absolutePath + '/META-INF/services/a.b.c.Service').text.contains('e.f.g.ServiceImpl')
+            new File(stageDir.absolutePath + '/META-INF/generic.file').exists()
+            new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('xyz')
+            new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('abc')
     }
     
 }

@@ -4,21 +4,35 @@ import java.io.File
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.FileTree
+import org.gradle.api.file.FileTreeElement
 import org.gradle.api.file.FileCollection.AntType
+import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.util.PatternSet
+import org.gradle.api.tasks.util.PatternFilterable
 
-class PrepareFiles extends DefaultTask{
+
+
+class PrepareFiles extends DefaultTask {
 
     @InputDirectory @Optional File resourcesDir
     @InputDirectory @Optional File classesDir
     @InputFiles @Optional FileCollection compileClasspath
 
     @OutputDirectory File stageDir
+    
+    @Delegate PatternFilterable filter = new PatternSet()
+    
+    PrepareFiles(){
+        super()
+        filter.include 'META-INF/services/*'
+    }
 
     @TaskAction prepareFiles(){
         File resourcesDir = getResourcesDir()
@@ -37,24 +51,28 @@ class PrepareFiles extends DefaultTask{
         if(resourcesDir?.exists()){
             ant.copy(todir: stageDir) { fileset(dir: resourcesDir) }
         }
-        
+
         if(classesDir?.exists()){
             ant.copy(todir: stageDir){ fileset(dir: classesDir) }
         }
 
-        FileCollection serviceFiles = files.filter{ File it ->
-            it.parent?.endsWith('META-INF/services') || it.parent?.endsWith('META-INF/services/')
-        }
-        File serviceDir = new File(stageDir.absolutePath + '/META-INF/services/')
-        serviceDir.deleteDir()
-        serviceDir.mkdirs()
+        FileTree filesToMerge = files.asFileTree.matching filter
 
-        for(File file in serviceFiles.files){
-            File serviceFile = new File(serviceDir, file.name)
-            if(!serviceFile.exists()){
-                serviceFile.createNewFile()
+        filesToMerge.files.each { println 'Service files: ' + it }
+
+        ant.delete {
+            fileset dir: stageDir, includes: filter.includes.join(','), excludes: filter.excludes.join(',')
+        }
+
+        stageDir.eachFileRecurse { println 'Stage dir after deletion: ' + it }
+
+        filesToMerge.visit { FileTreeElement file ->
+            if(file.isDirectory()) return
+                File theFile = new File(stageDir, file.relativePath.toString())
+            if(!theFile.exists()){
+                theFile.createNewFile()
             }
-            serviceFile.append file.text.trim() + '\n'
+            theFile.append file.file.text.trim() + '\n'
         }
     }
 
