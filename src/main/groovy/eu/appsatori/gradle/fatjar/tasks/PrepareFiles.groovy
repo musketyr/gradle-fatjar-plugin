@@ -58,13 +58,10 @@ class PrepareFiles extends DefaultTask {
 
         FileTree filesToMerge = files.asFileTree.matching filter
 
-        filesToMerge.files.each { println 'Service files: ' + it }
 
         ant.delete {
             fileset dir: stageDir, includes: filter.includes.join(','), excludes: filter.excludes.join(',')
         }
-
-        stageDir.eachFileRecurse { println 'Stage dir after deletion: ' + it }
 
         filesToMerge.visit { FileTreeElement file ->
             if(file.isDirectory()) return

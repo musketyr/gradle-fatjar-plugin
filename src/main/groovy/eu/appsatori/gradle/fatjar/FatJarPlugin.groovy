@@ -4,6 +4,8 @@ import java.io.File
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.tasks.bundling.Jar;
@@ -45,7 +47,7 @@ class FatJarPlugin implements Plugin<Project>{
                 null
             }
             prepareFiles.conventionMapping.map("compileClasspath") {
-                project.configurations.compile 
+                project.configurations.runtime.copyRecursive { !it.ext.has('fatJarExclude') || !it.ext.get('fatJarExclude') }
             }
             prepareFiles.conventionMapping.map("stageDir") { stageDir }
         }
@@ -65,8 +67,14 @@ class FatJarPlugin implements Plugin<Project>{
             War slimWar = project.tasks.add(FATJAR_SLIM_WAR, War)
             slimWar.description = FATJAR_SLIM_WAR_DESC
             slimWar.group = FATJAR_GROUP
-            slimWar.classpath = project.files fatJar.archivePath
             slimWar.dependsOn fatJar
+            
+            slimWar.conventionMapping.map("classpath") { 
+                project.files(fatJar.archivePath) +  project.configurations.runtime.copyRecursive {
+                    it.ext.has('fatJarExclude') && it.ext.get('fatJarExclude')
+                }
+            }
+            
         }
     }
 }
