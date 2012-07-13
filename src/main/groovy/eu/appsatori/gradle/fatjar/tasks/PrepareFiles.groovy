@@ -46,11 +46,19 @@ class PrepareFiles extends DefaultTask {
         }
 
         if(resourcesDir?.exists()){
-            ant.copy(todir: stageDir, failonerror: false) { fileset(dir: resourcesDir) }
+            // force: true, overwrite:true because we want the user's project to always win
+            // failOnerror: false to be compatible with case-insentive file systems
+            ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
+                fileset(dir: resourcesDir)
+            }
         }
 
         if(classesDir?.exists()){
-            ant.copy(todir: stageDir, failonerror: false){ fileset(dir: classesDir) }
+            // force: true, overwrite:true because we want the user's project to always win
+            // failOnerror: false to be compatible with case-insentive file systems
+            ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
+                fileset(dir: classesDir)
+            }
         }
 
         FileTree filesToMerge = files.asFileTree.matching filter
@@ -61,11 +69,15 @@ class PrepareFiles extends DefaultTask {
         }
 
         filesToMerge.visit { FileTreeElement file ->
-            if(file.isDirectory()) return
-                File theFile = new File(stageDir, file.relativePath.toString())
+            if(file.isDirectory())
+                return
+
+            File theFile = new File(stageDir, file.relativePath.toString())
+
             if(!theFile.exists()){
                 theFile.createNewFile()
             }
+
             theFile.append file.file.text.trim() + '\n'
         }
     }
