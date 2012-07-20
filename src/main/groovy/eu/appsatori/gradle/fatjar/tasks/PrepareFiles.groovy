@@ -1,7 +1,5 @@
 package eu.appsatori.gradle.fatjar.tasks
 
-import java.io.File
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
@@ -13,9 +11,8 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.util.PatternSet
 import org.gradle.api.tasks.util.PatternFilterable
+import org.gradle.api.tasks.util.PatternSet
 
 
 
@@ -26,9 +23,9 @@ class PrepareFiles extends DefaultTask {
     @InputFiles @Optional FileCollection compileClasspath
 
     @OutputDirectory File stageDir
-    
+
     @Delegate PatternFilterable filter = new PatternSet()
-    
+
     PrepareFiles(){
         super()
         filter.include 'META-INF/services/*'
@@ -43,17 +40,25 @@ class PrepareFiles extends DefaultTask {
 
         FileCollection files = getFatJarFiles()
         if(!files.isEmpty()){
-            ant.copy(todir: stageDir){
+            ant.copy(todir: stageDir, failonerror: false){
                 files.addToAntBuilder(ant, 'fileset', AntType.FileSet)
             }
         }
 
         if(resourcesDir?.exists()){
-            ant.copy(todir: stageDir) { fileset(dir: resourcesDir) }
+            // force: true, overwrite:true because we want the user's project to always win
+            // failOnerror: false to be compatible with case-insentive file systems
+            ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
+                fileset(dir: resourcesDir)
+            }
         }
 
         if(classesDir?.exists()){
-            ant.copy(todir: stageDir){ fileset(dir: classesDir) }
+            // force: true, overwrite:true because we want the user's project to always win
+            // failOnerror: false to be compatible with case-insentive file systems
+            ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
+                fileset(dir: classesDir)
+            }
         }
 
         FileTree filesToMerge = files.asFileTree.matching filter
@@ -64,11 +69,15 @@ class PrepareFiles extends DefaultTask {
         }
 
         filesToMerge.visit { FileTreeElement file ->
-            if(file.isDirectory()) return
-                File theFile = new File(stageDir, file.relativePath.toString())
+            if(file.isDirectory())
+                return
+
+            File theFile = new File(stageDir, file.relativePath.toString())
+
             if(!theFile.exists()){
                 theFile.createNewFile()
             }
+
             theFile.append file.file.text.trim() + '\n'
         }
     }
