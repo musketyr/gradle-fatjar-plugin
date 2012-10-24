@@ -5,6 +5,7 @@ import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin;
@@ -46,8 +47,20 @@ class FatJarPlugin implements Plugin<Project>{
                 }
                 null
             }
+            
             prepareFiles.conventionMapping.map("compileClasspath") {
-                project.configurations.runtime.copyRecursive { !it.ext.has('fatJarExclude') || !it.ext.get('fatJarExclude') }
+                def excluded = []
+                def classpath = project.configurations.runtime.copyRecursive { 
+                    if(!it.ext.has('fatJarExclude') || !it.ext.get('fatJarExclude')){
+                        return true
+                    }
+                    excluded << it
+                    false
+                }
+                for(Dependency d in excluded){
+                    classpath.exclude group: d.group, module: d.name
+                }
+                classpath
             }
             prepareFiles.conventionMapping.map("stageDir") { stageDir }
         }
