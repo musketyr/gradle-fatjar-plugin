@@ -27,6 +27,7 @@ class PrepareFilesTaskSpec extends Specification {
             resourcesDirServiceDir.mkdirs()
             new File(resourcesDirServiceDir, 'a.b.c.Service').append('a.b.c.ServiceImpl')
             new File(resourcesDir.absolutePath + '/META-INF/generic.file').append('xyz')
+            new File(resourcesDir.absolutePath + '/META-INF/donot.copy').append('xyz')
             new File(resourcesDirServiceDir, 'org.codehaus.groovy.runtime.ExtensionModule').append(PrepareFilesTaskSpecData.EXAMPLE_MODULE_A)
             
             File fakeClasspath = new File(dir, 'classpath')
@@ -36,6 +37,7 @@ class PrepareFilesTaskSpec extends Specification {
             fakeClasspathServiceDir.mkdirs()
             new File(fakeClasspathServiceDir, 'a.b.c.Service').append('e.f.g.ServiceImpl')
             new File(fakeClasspath.absolutePath + '/META-INF/generic.file').append('abc')
+            new File(fakeClasspath.absolutePath + '/META-INF/donot.copy').append('abc')
             new File(resourcesDirServiceDir, 'org.codehaus.groovy.runtime.ExtensionModule').append(PrepareFilesTaskSpecData.EXAMPLE_MODULE_B)
             
             
@@ -56,6 +58,7 @@ class PrepareFilesTaskSpec extends Specification {
             
             task.configure {
                 include 'META-INF/generic.file'
+                exclude 'META-INF/donot.copy'
             }
             
         when:
@@ -75,6 +78,7 @@ class PrepareFilesTaskSpec extends Specification {
             new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('abc')
             new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').exists()
             new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').text == PrepareFilesTaskSpecData.EXAMPLE_MODULE_RESULT
+            !new File(stageDir.absolutePath + '/META-INF/donot.copy').exists()
     }
     
 }

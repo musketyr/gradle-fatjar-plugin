@@ -26,7 +26,9 @@ class PrepareFiles extends DefaultTask {
 
     @Delegate PatternFilterable filter = new PatternSet()
 
-    PrepareFiles(){}
+    PrepareFiles(){
+        filter.include 'META-INF/services/*'
+    }
 
     @TaskAction prepareFiles(){
         File resourcesDir = getResourcesDir()
@@ -41,12 +43,12 @@ class PrepareFiles extends DefaultTask {
                 files.addToAntBuilder(ant, 'fileset', AntType.FileSet)
             }
         }
-
+        
         if(resourcesDir?.exists()){
             // force: true, overwrite:true because we want the user's project to always win
             // failOnerror: false to be compatible with case-insentive file systems
             ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
-                fileset(dir: resourcesDir)
+                fileset(dir: resourcesDir, excludes: filter.excludes.join(','))
             }
         }
 
@@ -54,17 +56,19 @@ class PrepareFiles extends DefaultTask {
             // force: true, overwrite:true because we want the user's project to always win
             // failOnerror: false to be compatible with case-insentive file systems
             ant.copy(todir: stageDir, force: true, overwrite: true, failOnError: false) {
-                fileset(dir: classesDir)
+                fileset(dir: classesDir, excludes: filter.excludes.join(','))
             }
         }
         
-        filter.include 'META-INF/services/*'
-
         FileTree filesToMerge = files.asFileTree.matching filter
 
 
+        Set<String> toDelete = [] as Set
+        toDelete.addAll(filter.includes)
+        toDelete.addAll(filter.excludes)
+        
         ant.delete {
-            fileset dir: stageDir, includes: filter.includes.join(','), excludes: filter.excludes.join(',')
+            fileset dir: stageDir, includes: toDelete.join(',')
         }
 
         filesToMerge.visit { FileTreeElement file ->
@@ -141,4 +145,5 @@ class PrepareFiles extends DefaultTask {
         }
         files
     }
+    
 }

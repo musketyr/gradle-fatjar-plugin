@@ -58,6 +58,16 @@ fatJarPrepareFiles {
 }
 ```
 
+### Excluding files
+
+You can specify files which should not be copied to fat jar using Ant-style pattern and `exclude` method on `fatJarPrepareFiles` task.
+
+```groovy
+fatJarPrepareFiles {
+  exclude 'META-INF/my.properties'
+}
+```
+
 ### Exclude JARs
 
 If you need to keep some JARs out of the JAR with dependencies you can specify extendended property `fatJarExclude` on
