@@ -17,9 +17,10 @@ buildscript {
     dependencies {
         classpath 'eu.appsatori:gradle-fatjar-plugin:0.1.2'
     }
-    
-    apply plugin: 'fatjar'
 }
+
+apply plugin: 'fatjar'
+
 ```
 
 ## Tasks
