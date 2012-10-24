@@ -26,10 +26,7 @@ class PrepareFiles extends DefaultTask {
 
     @Delegate PatternFilterable filter = new PatternSet()
 
-    PrepareFiles(){
-        super()
-        filter.include 'META-INF/services/*'
-    }
+    PrepareFiles(){}
 
     @TaskAction prepareFiles(){
         File resourcesDir = getResourcesDir()
@@ -60,6 +57,8 @@ class PrepareFiles extends DefaultTask {
                 fileset(dir: classesDir)
             }
         }
+        
+        filter.include 'META-INF/services/*'
 
         FileTree filesToMerge = files.asFileTree.matching filter
 
@@ -69,9 +68,10 @@ class PrepareFiles extends DefaultTask {
         }
 
         filesToMerge.visit { FileTreeElement file ->
-            if(file.isDirectory())
+            if(file.isDirectory()) {
                 return
-
+            }
+                
             File theFile = new File(stageDir, file.relativePath.toString())
 
             if(!theFile.exists()){
@@ -80,7 +80,53 @@ class PrepareFiles extends DefaultTask {
 
             theFile.append file.file.text.trim() + '\n'
         }
+        
+        handleExtensionModules(stageDir)
+        
     }
+
+	private handleExtensionModules(File stageDir) {
+		File extModuleFile = new File(stageDir, 'META-INF/services/org.codehaus.groovy.runtime.ExtensionModule')
+		if(!extModuleFile.exists()){
+			return
+		}
+		def modules = [extensionClasses: [], staticExtensionClasses: []]
+		extModuleFile.eachLine {
+			def line = it.trim()
+			if(line){
+                String key = line[0..(line.indexOf('=') - 1)].trim()
+                String value = line[(line.indexOf('=') + 1)..-1].trim()
+                switch(key){
+                    case 'moduleName': 
+                       if(modules.name) {
+                           modules.name = 'MergedByFatJar'
+                       } else {
+                           modules.name = value
+                       }
+                       break
+                    case 'moduleVersion':
+                       if(modules.version) {
+                           modules.version = project.version
+                       } else {
+                           modules.version = value
+                       }
+                       break
+                   case 'extensionClasses':
+                       modules.extensionClasses.addAll value.split(/\s*,\s*/)
+                       break
+                   case 'staticExtensionClasses':
+                       modules.staticExtensionClasses.addAll value.split(/\s*,\s*/)
+                       break
+                }
+			}
+		}
+        extModuleFile.withWriter { writer ->
+           writer.println "moduleName=$modules.name"
+           writer.println "moduleVersion=$modules.version"
+           writer.println "staticExtensionClasses=${modules.staticExtensionClasses.join(',')}"
+           writer.println "extensionClasses=${modules.extensionClasses.join(',')}"
+        }
+	}
 
     private FileCollection getFatJarFiles(){
         FileCollection files = project.files([])

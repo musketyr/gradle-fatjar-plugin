@@ -13,6 +13,7 @@ class PrepareFilesTaskSpec extends Specification {
     def 'Test prepare task'() {
         given:
             Project project = ProjectBuilder.builder().build()
+            project.version = '1.0.1'
 
             def dir = TempDir.createNew('prepare-task')
             
@@ -26,6 +27,7 @@ class PrepareFilesTaskSpec extends Specification {
             resourcesDirServiceDir.mkdirs()
             new File(resourcesDirServiceDir, 'a.b.c.Service').append('a.b.c.ServiceImpl')
             new File(resourcesDir.absolutePath + '/META-INF/generic.file').append('xyz')
+            new File(resourcesDirServiceDir, 'org.codehaus.groovy.runtime.ExtensionModule').append(PrepareFilesTaskSpecData.EXAMPLE_MODULE_A)
             
             File fakeClasspath = new File(dir, 'classpath')
             fakeClasspath.mkdirs()
@@ -34,7 +36,7 @@ class PrepareFilesTaskSpec extends Specification {
             fakeClasspathServiceDir.mkdirs()
             new File(fakeClasspathServiceDir, 'a.b.c.Service').append('e.f.g.ServiceImpl')
             new File(fakeClasspath.absolutePath + '/META-INF/generic.file').append('abc')
-            
+            new File(resourcesDirServiceDir, 'org.codehaus.groovy.runtime.ExtensionModule').append(PrepareFilesTaskSpecData.EXAMPLE_MODULE_B)
             
             
             File libDir = new File(dir, 'lib')
@@ -71,6 +73,8 @@ class PrepareFilesTaskSpec extends Specification {
             new File(stageDir.absolutePath + '/META-INF/generic.file').exists()
             new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('xyz')
             new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('abc')
+            new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').exists()
+            new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').text == PrepareFilesTaskSpecData.EXAMPLE_MODULE_RESULT
     }
     
 }
