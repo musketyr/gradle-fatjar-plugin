@@ -6,12 +6,14 @@ final class PrepareFilesTaskSpecData {
 moduleVersion = 1.0
 staticExtensionClasses = groovy.datomic.extension.DatomicPeerExtension
 extensionClasses = groovy.datomic.extension.EntityMapExtension
+faultyKey =
 '''
     
     public static final String EXAMPLE_MODULE_B = '''moduleName = GBenchExtension
 moduleVersion = 1.0
 staticExtensionClasses = groovyx.gbench.BenchmarkStaticExtension
 extensionClasses = groovyx.gbench.BenchmarkExtension
+faultyKey
 '''
     
     public static final String EXAMPLE_MODULE_RESULT = '''moduleName=MergedByFatJar

@@ -89,17 +89,21 @@ class PrepareFiles extends DefaultTask {
         
     }
 
-	private handleExtensionModules(File stageDir) {
-		File extModuleFile = new File(stageDir, 'META-INF/services/org.codehaus.groovy.runtime.ExtensionModule')
-		if(!extModuleFile.exists()){
-			return
-		}
-		def modules = [extensionClasses: [], staticExtensionClasses: []]
-		extModuleFile.eachLine {
-			def line = it.trim()
-			if(line){
-                String key = line[0..(line.indexOf('=') - 1)].trim()
-                String value = line[(line.indexOf('=') + 1)..-1].trim()
+    private handleExtensionModules(File stageDir) {
+        File extModuleFile = new File(stageDir, 'META-INF/services/org.codehaus.groovy.runtime.ExtensionModule')
+        if(!extModuleFile.exists()){
+            return
+        }
+        def modules = [extensionClasses: [], staticExtensionClasses: []]
+        extModuleFile.eachLine {
+            def line = it.trim()
+            if(line){
+                int indexOfEqualSign = line.indexOf('=')
+                if(indexOfEqualSign < 0 || indexOfEqualSign == line.size() - 1){
+                    return
+                }
+                String key = line[0..(indexOfEqualSign - 1)].trim()
+                String value = line[(indexOfEqualSign + 1)..-1].trim()
                 switch(key){
                     case 'moduleName': 
                        if(modules.name) {
@@ -122,15 +126,15 @@ class PrepareFiles extends DefaultTask {
                        modules.staticExtensionClasses.addAll value.split(/\s*,\s*/)
                        break
                 }
-			}
-		}
+            }
+        }
         extModuleFile.withWriter { writer ->
            writer.println "moduleName=$modules.name"
            writer.println "moduleVersion=$modules.version"
            writer.println "staticExtensionClasses=${modules.staticExtensionClasses.join(',')}"
            writer.println "extensionClasses=${modules.extensionClasses.join(',')}"
         }
-	}
+    }
 
     private FileCollection getFatJarFiles(){
         FileCollection files = project.files([])
