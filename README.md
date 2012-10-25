@@ -27,7 +27,7 @@ apply plugin: 'fatjar'
 
   >  **Note:** regular `jar` and `war` tasks are note replaced by this plugin. You can still use them.
   >  Don't forget that you need to configure `fatJar` and `slimWar` tasks if you want to modify generated
-  >  manifest or exclude files.
+  >  manifest or exclude files not `jar` or `war` ones.
 
 ### `fatJarPrepareFiles`
 
