@@ -25,6 +25,10 @@ apply plugin: 'fatjar'
 
 ## Tasks
 
+  >  **Note:** regular `jar` and `war` tasks are note replaced by this plugin. You can still use them.
+  >  Don't forget that you need to configure `fatJar` and `slimWar` tasks if you want to modify generated
+  >  manifest or exclude files.
+
 ### `fatJarPrepareFiles`
 
 Explodes all JARs into the stage directory and merges all files needed such as those in `META-INF/services`.
@@ -33,8 +37,16 @@ Explodes all JARs into the stage directory and merges all files needed such as t
 
 Creates the JAR with all dependencies bundled. 
 
-This is regullar `Jar` task so you can e.g. customize the manifest as
+This is regular `Jar` task so you can e.g. customize the manifest as
 described in [Jar Task DSL](http://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.Jar.html).
+You can for example exclude files from being jared.
+
+```groovy
+fatJar {
+    exclude 'META-INF/*.DSA'
+}
+```
+
 
 ### `slimWar`
 
@@ -43,6 +55,13 @@ WAR file.
 
 This is regullar `War` task so you can e.g. customize the `web.xml` file as
 described in [War Task DSL](http://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html).
+You can for example exclude files which you don't want to copy into the final WAR.
+
+```groovy
+slimWar {
+    exclude('WEB-INF/gtpl/', 'WEB-INF/groovy/')
+}
+```
 
 ## Customization
 
