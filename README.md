@@ -14,7 +14,7 @@ Plugin is hosted in Maven Central Repository. You can easily add plugin to your 
 
 ```groovy
 buildscript {
-    respositories {
+    repositories {
         mavenCentral()
     }
     
