@@ -14,6 +14,10 @@ Plugin is hosted in Maven Central Repository. You can easily add plugin to your 
 
 ```groovy
 buildscript {
+    respositories {
+        mavenCentral()
+    }
+    
     dependencies {
         classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
     }
