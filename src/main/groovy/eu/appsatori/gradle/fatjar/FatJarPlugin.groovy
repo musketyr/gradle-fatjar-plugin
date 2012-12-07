@@ -1,16 +1,13 @@
 package eu.appsatori.gradle.fatjar
 
-import java.io.File
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.file.FileCollection;
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.WarPlugin;
-import org.gradle.api.tasks.bundling.Jar;
-import org.gradle.api.tasks.bundling.War;
+import org.gradle.api.plugins.WarPlugin
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.War
 
 import eu.appsatori.gradle.fatjar.tasks.PrepareFiles
 
@@ -50,16 +47,20 @@ class FatJarPlugin implements Plugin<Project>{
             
             prepareFiles.conventionMapping.map("compileClasspath") {
                 def excluded = []
+                project.logger.debug("FatJar: Building compile classpath")
                 def classpath = project.configurations.runtime.copyRecursive { 
                     if(!it.ext.has('fatJarExclude') || !it.ext.get('fatJarExclude')){
+                        project.logger.debug("FatJar: $it.group:$it.name is INCLUDED ($it)")
                         return true
                     }
+                    project.logger.debug("FatJar: $it.group:$it.name:$it.version is EXCLUDED ($it)")
                     excluded << it
                     false
                 }
                 for(Dependency d in excluded){
-                    classpath.exclude group: d.group, module: d.name
+                    classpath.exclude group: d.group, module: d.name                        
                 }
+                project.logger.debug("FatJar: classpath contains following files -  ${classpath.resolve()}")
                 classpath
             }
             prepareFiles.conventionMapping.map("stageDir") { stageDir }

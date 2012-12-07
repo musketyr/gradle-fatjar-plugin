@@ -1,21 +1,22 @@
 package eu.appsatori.gradle.fatjar.tasks
 
-import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.testfixtures.ProjectBuilder;
-
-import eu.appsatori.gradle.fatjar.TempDir;
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 import spock.lang.Specification
 
 class PrepareFilesTaskSpec extends Specification {
+    
+    @Rule TemporaryFolder folder
 
     def 'Test prepare task'() {
         given:
             Project project = ProjectBuilder.builder().build()
             project.version = '1.0.1'
 
-            def dir = TempDir.createNew('prepare-task')
+            def dir = folder.newFolder('prepare-task')
             
             File classesDir = new File(dir, 'classes')
             classesDir.mkdirs()

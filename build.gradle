@@ -12,7 +12,7 @@ apply plugin: 'groovy'
 apply plugin: 'nexus'
 
 group = 'eu.appsatori'
-version = '0.2-rc1'
+version = '0.2-rc2'
 
 repositories {
     mavenCentral()
