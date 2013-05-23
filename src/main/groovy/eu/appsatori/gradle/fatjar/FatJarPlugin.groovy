@@ -66,19 +66,19 @@ class FatJarPlugin implements Plugin<Project>{
             prepareFiles.conventionMapping.map("stageDir") { stageDir }
         }
 
-        PrepareFiles prepareFiles = project.tasks.add(FATJAR_PREPARE_FILES, PrepareFiles)
+        PrepareFiles prepareFiles = project.tasks.create(FATJAR_PREPARE_FILES, PrepareFiles)
         prepareFiles.description = FATJAR_PREPARE_FILES_DESC
         prepareFiles.group = FATJAR_GROUP
         prepareFiles.dependsOn project.tasks.classes
         
-        Jar fatJar = project.tasks.add(FATJAR_FAT_JAR, Jar)
+        Jar fatJar = project.tasks.create(FATJAR_FAT_JAR, Jar)
         fatJar.description = FATJAR_FAT_JAR_DESC
         fatJar.group = FATJAR_GROUP
         fatJar.dependsOn prepareFiles
         fatJar.from stageDir
         
         if(project.plugins.hasPlugin(WarPlugin)){
-            War slimWar = project.tasks.add(FATJAR_SLIM_WAR, War)
+            War slimWar = project.tasks.create(FATJAR_SLIM_WAR, War)
             slimWar.description = FATJAR_SLIM_WAR_DESC
             slimWar.group = FATJAR_GROUP
             slimWar.dependsOn fatJar
