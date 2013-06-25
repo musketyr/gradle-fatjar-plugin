@@ -81,5 +81,45 @@ class PrepareFilesTaskSpec extends Specification {
             new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').text == PrepareFilesTaskSpecData.EXAMPLE_MODULE_RESULT
             !new File(stageDir.absolutePath + '/META-INF/donot.copy').exists()
     }
+
+    def 'plugin correctly deals with classesDir and resourcesDir being the same'() {
+        given:
+        Project project = ProjectBuilder.builder().build()
+        project.version = '1.0.1'
+
+        def dir = folder.newFolder('prepare-task')
+
+        File classesDir = new File(dir, 'classes')
+        File resourcesDir = classesDir
+        classesDir.mkdirs()
+
+        File resourcesDirServiceDir =  new File(resourcesDir.absolutePath + '/META-INF/services/')
+        resourcesDirServiceDir.mkdirs()
+        new File(resourcesDirServiceDir, 'a.b.c.Service').append('a.b.c.ServiceImpl')
+        File fakeClasspath = new File(dir, 'classpath')
+        fakeClasspath.mkdirs()
+
+        File libDir = new File(dir, 'lib')
+        libDir.mkdirs()
+
+        File libFile = new File(new File('./src/test/resources/a.jar').absolutePath)
+
+        project.ant.copy(todir: libDir, file: libFile)
+
+        File stageDir = new File(dir, 'stage')
+
+        PrepareFiles task = project.task('prepareFatJar', type: PrepareFiles)
+        task.classesDir = classesDir
+        task.resourcesDir = resourcesDir
+        task.compileClasspath = project.files(fakeClasspath) + project.fileTree(libDir)
+        task.stageDir = stageDir
+
+        when:
+        task.prepareFiles()
+
+        then:
+        new File(stageDir.absolutePath + '/META-INF/services/a.b.c.Service').exists()
+        new File(stageDir.absolutePath + '/META-INF/services/a.b.c.Service').text == 'a.b.c.ServiceImpl\n'
+    }
     
 }

@@ -138,8 +138,15 @@ class PrepareFiles extends DefaultTask {
 
     private FileCollection getFatJarFiles(){
         FileCollection files = project.files([])
-        if(getResourcesDir()?.exists()) files += project.fileTree getResourcesDir()
-        if(getClassesDir()?.exists()) files += project.fileTree getClassesDir()
+        Set<File> paths = [] as Set
+        if (getResourcesDir()?.exists())
+            paths += getResourcesDir().canonicalFile
+        if (getClassesDir()?.exists())
+            paths += getClassesDir().canonicalFile
+
+        paths.each {
+            files += project.fileTree it
+        }
 
         def collected = getCompileClasspath().collect {
             it.isDirectory() ? project.fileTree(it) : project.zipTree(it)
