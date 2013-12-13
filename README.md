@@ -57,7 +57,7 @@ fatJar {
 Bundles all output classes into JAR with dependencies and place it into `WEB-INF/lib` directory of the newly created
 WAR file.
 
-This is regullar `War` task so you can e.g. customize the `web.xml` file as
+This is regular `War` task so you can e.g. customize the `web.xml` file as
 described in [War Task DSL](http://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html).
 You can for example exclude files which you don't want to copy into the final WAR.
 
