@@ -1,11 +1,8 @@
 # Gradle FatJar Plugin
 
-Gradle FatJar Plugin allows you to create JAR file with all dependecies bundled inside. It handles files in `META-INF/services`
+Gradle FatJar Plugin allows you to create JAR file with all dependencies bundled inside. It handles files in `META-INF/services`
 directory gracefully by merging them. It also allows you to create slim WAR file which contains only JAR with dependencies.
 Classes are also bundled into the JAR instead of putting them into `WEB-INF/classes`.
-
-
-## 
 
 
 Plugin is hosted in Maven Central Repository. You can easily add plugin to your build script using following configuration
@@ -17,7 +14,7 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    
+
     dependencies {
         classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
     }
@@ -29,7 +26,7 @@ apply plugin: 'fatjar'
 
 ## Tasks
 
-  >  **Note:** regular `jar` and `war` tasks are note replaced by this plugin. You can still use them.
+  >  **Note:** regular `jar` and `war` tasks are not replaced by this plugin. You can still use them.
   >  Don't forget that you need to configure `fatJar` and `slimWar` tasks if you want to modify generated
   >  manifest or exclude files not `jar` or `war` ones.
 
@@ -39,7 +36,7 @@ Explodes all JARs into the stage directory and merges all files needed such as t
 
 ### `fatJar`
 
-Creates the JAR with all dependencies bundled. 
+Creates the JAR with all dependencies bundled.
 
 This is regular `Jar` task so you can e.g. customize the manifest as
 described in [Jar Task DSL](http://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.Jar.html).
@@ -93,7 +90,7 @@ fatJarPrepareFiles {
 
 ### Exclude JARs
 
-If you need to keep some JARs out of the JAR with dependencies you can specify extendended property `fatJarExclude` on
+If you need to keep some JARs out of the JAR with dependencies you can specify extended property `fatJarExclude` on
 particular dependency. All excluded JARs will be placed in `WEB-INF\lib` directory if `slimWar` task is called.
 
 ```groovy
@@ -105,5 +102,3 @@ dependencies {
   }
 }
 ```
-
-
