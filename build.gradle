@@ -13,7 +13,7 @@ apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.artifactory"
 
 group = 'eu.appsatori'
-version = '0.3-SNAPSHOT'
+version = '0.4-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -38,12 +38,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from destinationDir
 }
 
-artifacts {
-    archives sourcesJar, javadocJar, jar
-}
-
-ext.bintrayUsername = project.hasProperty('bintrayUsername')?project.getProperty('bintrayUsername'):System.getenv('BINTRAY_USER')?:''
-ext.bintrayKey = project.hasProperty('bintrayKey')?project.getProperty('bintrayKey'):System.getenv('BINTRAY_KEY')?:''
+ext.bintrayUsername = project.hasProperty('bintrayUser')?project.bintrayUser:System.getenv('BINTRAY_USER')?:''
+ext.bintrayKey = project.hasProperty('bintrayKey')?project.bintrayKey:System.getenv('BINTRAY_KEY')?:''
 
 artifactory {
     contextUrl = 'https://oss.jfrog.org'
