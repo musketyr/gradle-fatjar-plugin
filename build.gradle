@@ -1,64 +1,124 @@
+
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
-    
     dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.2'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1"
     }
 }
 
 apply plugin: 'groovy'
-apply plugin: 'nexus'
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
 
 group = 'eu.appsatori'
-version = '0.2'
+version = '0.4-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
     compile localGroovy()
     compile gradleApi()
     
-    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+    testCompile ("org.spockframework:spock-core:0.7-groovy-2.0") {
+        exclude module : 'groovy-all' //localGroovy and spock groovy will probably conflict. Both are 2.x, we're good.
+    }
 }
 
-modifyPom {
-    project {
-        name 'Gradle FatJar Plugin'
-        packaging 'jar'
-        description 'Gradle plugin to build fat JARs with dependencies.'
-        url 'https://github.com/musketyr/gradle-fatjar-plugin.git'
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-        scm {
-            url 'scm:git://github.com/musketyr/gradle-fatjar-plugin.git'
-            connection 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git'
-            developerConnection 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git'
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from destinationDir
+}
+
+ext.bintrayUsername = project.hasProperty('bintrayUser')?project.bintrayUser:System.getenv('BINTRAY_USER')?:''
+ext.bintrayKey = project.hasProperty('bintrayKey')?project.bintrayKey:System.getenv('BINTRAY_KEY')?:''
+
+artifactory {
+    contextUrl = 'https://oss.jfrog.org'
+    resolve {
+        repository {
+            repoKey = 'libs-release'
         }
-
-        licenses {
-            license {
-                name 'The Apache Software License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
-            }
+    }
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local' //The Artifactory repository key to publish to
+            //when using oss.jfrog.org the credentials are from Bintray. For local build we expect them to be found in
+            //~/.gradle/gradle.properties, otherwise to be set in the build server
+            username = bintrayUsername
+            password = bintrayKey
         }
+        defaults {
+            publications 'main'
+        }
+    }
+}
 
-        developers {
-            developer {
-                id 'vladimirorany'
-                name 'Vladimir Orany'
-            }
-            developer {
-                id 'ben-manes'
-                name 'Ben Manes'
-            }
-            developer {
-                id 'nhan'
-                name 'Nhan Nguyen'
+
+publishing {
+    publications {
+        main(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom.withXml {
+                asNode().with {
+                    appendNode('packaging', 'jar')
+                    appendNode('name', 'Gradle FatJar Plugin')
+                    appendNode('description', 'Gradle plugin to build fat JARs with dependencies.')
+                    appendNode('url', 'https://github.com/musketyr/gradle-fatjar-plugin.git')
+                    appendNode('licenses').with {
+                        appendNode('license').with {
+                            appendNode('name', 'The Apache Software License, Version 2.0')
+                            appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0')
+                        }
+                    }
+                    appendNode('developers').with {
+                        appendNode('developer').with {
+                            appendNode('id', 'vladimirorany')
+                            appendNode('name', 'Vladimir Orany')
+                        }
+                        appendNode('developer').with {
+                            appendNode('id', 'ben-manes')
+                            appendNode('name', 'Ben Manes')
+                        }
+                        appendNode('developer').with {
+                            appendNode('id', 'nhan')
+                            appendNode('name', 'Nhan Nguyen')
+                        }
+                        appendNode('developer').with {
+                            appendNode('id', 'jbaruch')
+                            appendNode('name', 'Baruch Sadogursky')
+                            appendNode('email', 'jbaruch@jfrog.com')
+                        }
+                    }
+                    appendNode('scm').with {
+                        appendNode('connection', 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git')
+                        appendNode('developerConnection', 'scm:git://github.com/glaforge/gradle-fatjar-plugin.git')
+                        appendNode('url', 'scm:git://github.com/musketyr/gradle-fatjar-plugin.git')
+                    }
+                }
+                asNode().dependencies.'*'.findAll() {
+                    it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+                        dep.name == it.artifactId.text()
+                    }
+                }.each() {
+                    it.scope*.value = 'compile'
+                }
             }
         }
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
 }

@@ -4,19 +4,22 @@ Gradle FatJar Plugin allows you to create JAR file with all dependencies bundled
 directory gracefully by merging them. It also allows you to create slim WAR file which contains only JAR with dependencies.
 Classes are also bundled into the JAR instead of putting them into `WEB-INF/classes`.
 
+[![Build Status](https://travis-ci.org/jbaruch/gradle-fatjar-plugin.svg?branch=master)](https://travis-ci.org/jbaruch/gradle-fatjar-plugin)
 
-Plugin is hosted in Maven Central Repository. You can easily add plugin to your build script using following configuration
+[ ![Download](https://api.bintray.com/packages/jbaruch/jbaruch-maven/eu.appsatori%3Agradle-fatjar-plugin/images/download.png) ](https://bintray.com/jbaruch/jbaruch-maven/eu.appsatori%3Agradle-fatjar-plugin/_latestVersion)
+
+Plugin is hosted on [Bintray](https://bintray.com/jbaruch/jbaruch-maven/eu.appsatori%3Agradle-fatjar-plugin). You can easily add plugin to your build script using following configuration
 
 ## Installation
 
 ```groovy
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+        classpath 'eu.appsatori:gradle-fatjar-plugin:3.0'
     }
 }
 

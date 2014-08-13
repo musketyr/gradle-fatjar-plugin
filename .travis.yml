@@ -1,0 +1,9 @@
+before_script: chmod +x gradlew
+script: ./gradlew -q -s -PbuildInfo.build.number=$TRAVIS_BUILD_NUMBER -PbuildInfo.buildUrl=https://travis-ci.org/${TRAVIS_REPO_SLUG}/builds/${TRAVIS_JOB_ID}
+  -PbuildInfo.buildAgent.name=$USER -PbuildInfo.principal=$USER clean build artifactoryPublish
+jdk:
+- openjdk7
+env:
+  global:
+  - secure: JLeYOQiEjZJ0pP+xwz1k06zI+3guVHfoZTGaJ7hSfPmYpZtzZfD7kjE9JZ9LaOEN5gRio1+Fa2bohnHRzFbwhrXYj+H/RL9hY47mW2OANB4rjhOXBlhNbpiu1HuwgABN1+wdulK/oBYZ8kwe0inNkWO5HsLAaOg7DgB2ij+5q6M=
+  - secure: jReDxztgoM2XJcOGMh5PBtEBhOm9thP2WnVVjImihtOT3bQSdQIkuY5Q4Vf4TJTbHGLnY5CRQVGP40hk33AU64HF6QJxBNBx4ZYB4u286ZlBvmXnUoDiZIBBI1UwLcB+Vg1iXJdd8ywSRO2azw+bdR61K6T5SbzLjxpw+/ifWz8=

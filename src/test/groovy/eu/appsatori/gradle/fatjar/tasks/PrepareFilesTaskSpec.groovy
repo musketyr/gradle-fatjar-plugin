@@ -78,7 +78,7 @@ class PrepareFilesTaskSpec extends Specification {
             new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('xyz')
             new File(stageDir.absolutePath + '/META-INF/generic.file').text.contains('abc')
             new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').exists()
-            new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').text == PrepareFilesTaskSpecData.EXAMPLE_MODULE_RESULT
+            new File(stageDir.absolutePath + '/META-INF/services/org.codehaus.groovy.runtime.ExtensionModule').readLines() == PrepareFilesTaskSpecData.EXAMPLE_MODULE_RESULT
             !new File(stageDir.absolutePath + '/META-INF/donot.copy').exists()
     }
 
