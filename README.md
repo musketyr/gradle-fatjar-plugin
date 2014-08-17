@@ -19,7 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'eu.appsatori:gradle-fatjar-plugin:3.0'
+        classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
     }
 }
 
