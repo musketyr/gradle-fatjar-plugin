@@ -23,7 +23,7 @@ buildscript {
     }
 }
 
-apply plugin: 'fatjar'
+apply plugin: 'eu.appsatori.fatjar'
 
 ```
 
