@@ -105,3 +105,27 @@ dependencies {
   }
 }
 ```
+
+### Create executable jar
+
+Adapted from http://stackoverflow.com/questions/23738676/how-to-specify-main-class-when-using-fatjar-plugin-in-gradle-build
+
+Replace
+
+```
+apply plugin: 'eu.appsatori.fatjar'
+```
+
+with
+
+```
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+        attributes 'Main-Class': 'com.organization.project.package.mainClassName'
+    }
+}
+```
