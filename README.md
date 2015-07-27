@@ -1,5 +1,7 @@
 # Gradle FatJar Plugin
 
+> **WARNING:** This plugin is no longer under active development. Please, migrate to [Gradle Shadow Plugin](https://github.com/johnrengelman/shadow) which provides similar functionality.
+
 Gradle FatJar Plugin allows you to create JAR file with all dependencies bundled inside. It handles files in `META-INF/services`
 directory gracefully by merging them. It also allows you to create slim WAR file which contains only JAR with dependencies.
 Classes are also bundled into the JAR instead of putting them into `WEB-INF/classes`.
